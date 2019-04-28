@@ -1,0 +1,119 @@
+\documentclass[cn]{elegantbook}
+\usepackage[square,numbers,sort&compress]{natbib}
+\newcommand{\upcite}[1]{\textsuperscript{\textsuperscript{\cite{#1}}}}
+\usepackage{diagbox}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\renewcommand{\algorithmicrequire}{\textbf{输入：}}
+\renewcommand{\algorithmicensure}{\textbf{输出：}}
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width = 2cm, minimum height=1cm,text centered, draw = black, fill = red!40]
+\tikzstyle{arrow} = [->,>=stealth]
+
+% title info
+\title{模式识别作业5}
+\subtitle{贝叶斯分类}
+% bio info
+\author{罗雁天}
+\institute{清华大学电子系}
+\version{2018310742}
+\date{\today}
+\logo{logo.png}
+\cover{cover.jpg}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\mainmatter
+\hypersetup{pageanchor=true}
+% add preface chapter here if needed
+\chapter{问题描述}
+设有符合正太分布的两类样本，并且设$P(\omega_1)=P(\omega_2)=0.5$.
+\begin{equation}
+\begin{aligned}
+\omega_1&=\{(3,4),(3,8),(2,6),(4,6)\} \\
+\omega_2&=\{(3,0),(3,-4),(1,-2),(5,-2)\}
+\end{aligned}
+\end{equation}
+求解以下问题：
+\begin{itemize}
+	\item 求识别函数
+	\item 求识别界面方程
+	\item 绘制识别界面
+\end{itemize}
+
+\chapter{分类结果}
+首先计算两个类的类均值：
+\begin{equation}
+M_1=[3,6], M_2=[3,-2]
+\end{equation}
+
+根据无偏估计的协方差矩阵计算方法：
+\begin{equation}
+\Sigma_i=\frac{1}{N-1}\left(\omega_i-M_i\right)^T\left(\omega_i-M_i\right)\quad i=1,2
+\end{equation}
+
+计算两个类的协方差矩阵：
+\begin{equation}
+\Sigma_1=\left[\begin{array}{cc}
+0.6667 & 0\\
+0 & 2.6667
+\end{array}\right],\Sigma_2=\left[\begin{array}{cc}
+2.6667 & 0 \\
+0 & 2.6667
+\end{array}\right]
+\end{equation}
+
+计算正态分布时贝叶斯判别准则所需要的参数如下：
+\begin{equation}
+\begin{aligned}
+\mathbf{W}_1&=-\frac{1}{2}\Sigma_1^{-1}=\left[\begin{array}{cc}
+-0.7500 & 0 \\
+0 & -0.1875
+\end{array}\right] \\
+\mathbf{W}_2&=-\frac{1}{2}\Sigma_2^{-1}=\left[\begin{array}{cc}
+-0.1875 & 0 \\
+0 & -0.1875
+\end{array}\right] \\
+\mathbf{w}_1&=\Sigma_1^{-1}M_1=[4.50,2.25]^T; \\
+\mathbf{w}_2&=\Sigma_2^{-1}M_2=[1.125,-0.75]^T; \\
+w_{10}&=-\frac{1}{2}M_1^T\Sigma_1^{-1}M_1-\frac{1}{2}\ln |\Sigma_1|+\ln P(\omega_1)=-14.4808 \\
+w_{20}&=-\frac{1}{2}M_2^T\Sigma_1^{-1}M_2-\frac{1}{2}\ln |\Sigma_2|+\ln P(\omega_2)=-4.1115
+\end{aligned}
+\end{equation}
+
+对任意数据点$\mathbf{x}=[x_1,x_2]^T$，计算两类的识别函数如下：
+\begin{equation}
+\begin{aligned}
+d_1(\mathbf{x})&=\mathbf{x}^T\mathbf{W}_1\mathbf{x}+\mathbf{w}_1^T\mathbf{x}+w_{10} \\
+&=-0.75x^2-0.1875x_2^2+4.5x_1+2.25x_2-14.4808 \\
+d_2(\mathbf{x})&=\mathbf{x}^T\mathbf{W}_2\mathbf{x}+\mathbf{w}_2^T\mathbf{x}+w_{20} \\
+&=-0.1875x^2-0.1875x_2^2+1.125x_1-0.75x_2-4.1115
+\end{aligned}
+\end{equation}
+
+则判别函数如下：
+\begin{equation}
+f(\mathbf{x})=\left\{\begin{array}{cc}
+x\in\mbox{class1} & \mbox{if}\quad d_1(\mathbf{x})>d_2(\mathbf{x}) \\
+x\in\mbox{class2} & else
+\end{array}\right.
+\end{equation}
+
+计算识别界面如下：
+\begin{equation}
+d_1(\mathbf{x})=d_2(\mathbf{x})\Rightarrow -0.5625x_1^2+3.375x_1+3x_2-10.3693=0
+\end{equation}
+\chapter{代码说明}
+\noindent 本次实验使用Matlab语言编写，所有代码放置在“code/”文件夹下:
+\begin{itemize}
+	\item iterative.m: 迭代修正求权向量法分类的主程序，直接执行便可以得到分类界面；
+	\item knnclassify.m: KNN算法分类的主程序，直接执行便可以得到不同k下的分类界面以及正确率曲线；
+	\item fishermain.m: Fisher判别分析算法分类的主程序，直接执行便可以得到情况1和情况2的分类界面图像；
+	\item fisherclassify.m: 使用Fisher判别分析分类的函数，输入$\omega_1, \omega_2$，输出权向量$W_0$和分类阈值$y_0$，并且绘制分类界面图像。
+	\item compare.m: 使用最小欧式距离分类和SVM分类的代码，直接执行绘制分类界面的图像。
+\end{itemize}
+
+\end{document}
