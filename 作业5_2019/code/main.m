@@ -9,7 +9,7 @@ w2 = [3,0;3,-4;1,-2;5,-2];
 Bayes_Gauss(w1, w2);
 
 %% Advaced analysis
-Sigma1=Sigma2=sigma^2*I
+%Sigma1=Sigma2=sigma^2*I
 w1_1 = [3,4;3,8;1,6;5,6];
 w2_1 = [1,0;1,-4;-1,-2;3,-2];
 Sigma1_1 = cov(w1_1);
